@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Món Quà Từ Đại Dương — Hộp Nhẫn Bạc Kim Cương 3D</title>
+    <title>Gửi người ah thương </title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -152,8 +152,13 @@
 </head>
 <body class="relative select-none">
 
-    <!-- Trình phát nhạc nền: Ưu tiên trực tiếp music.mp3 và hỗ trợ phát trên mọi thiết bị di động (iOS/Android) -->
-    <audio id="bg-music" src="./music.mp3" loop preload="auto" playsinline webkit-playsinline></audio>
+    <!-- Trình phát nhạc nền (Đặt file nhạc cùng thư mục với index.html trên GitHub với tên nhac.mp3, old-love.mp3 hoặc music.mp3) -->
+    <audio id="bg-music" loop preload="auto">
+        <source src="./nhac.mp3" type="audio/mpeg">
+        <source src="./old-love.mp3" type="audio/mpeg">
+        <source src="./Old Love.mp3" type="audio/mpeg">
+        <source src="./music.mp3" type="audio/mpeg">
+    </audio>
 
     <!-- 2D Dynamic Background Canvas (Synced with Ring Box Color) -->
     <canvas id="bg-effects-canvas"></canvas>
@@ -199,16 +204,16 @@
             <div class="mx-auto w-24 h-1 rounded-full bg-gradient-to-r from-transparent via-sky-300 to-transparent mb-3 opacity-80"></div>
             
             <p id="wish-recipient" class="text-xs sm:text-sm uppercase tracking-[0.25em] text-sky-300 font-semibold mb-1.5">
-                Gửi người anh thương
+                love
             </p>
             
             <h2 id="wish-message" class="font-serif-luxury italic text-xl sm:text-2xl md:text-[26px] leading-relaxed text-white drop-shadow-[0_2px_12px_rgba(14,165,233,0.5)]">
-                “Chúc emm ngày 20/10 thật hạnh phúc ,tràng đầy yêu thương.Chúc emm ngày càng xinh đẹp ,ngày càng dth.Ah iu em cô bé de ghett của ah”
+                “”
             </h2>
 
             <div class="mt-3 flex items-center justify-center gap-3 text-[11px] text-sky-200/80">
                 <span class="h-[1px] w-8 bg-gradient-to-r from-transparent to-sky-300/60"></span>
-                <span id="wish-signature" class="tracking-widest uppercase font-medium text-sky-100">ahh ghett em</span>
+                <span id="wish-signature" class="tracking-widest uppercase font-medium text-sky-100">By nguoi tinh mua dong</span>
                 <span class="h-[1px] w-8 bg-gradient-to-l from-transparent to-sky-300/60"></span>
             </div>
         </div>
@@ -304,17 +309,13 @@
             openProgress: 0
         };
 
-        // Bộ điều khiển Nhạc Nền MP3 (Tương thích iOS/Android/Mọi trình duyệt) & Nhạc nền dự phòng
+        // Bộ điều khiển Nhạc Nền MP3 & Hiệu ứng Âm Thanh Mở Hộp
         class OceanChimeAudio {
             constructor() {
                 this.ctx = null;
                 this.bgAudio = null;
                 this.isBgPlaying = false;
                 this.fadeInterval = null;
-                this.fallbackLoopTimer = null;
-                this.mp3Failed = false;
-                this.candidateSources = ['./music.mp3', './nhac.mp3', './old-love.mp3', './Old Love.mp3'];
-                this.currentSourceIdx = 0;
             }
             init() {
                 if (!this.ctx) {
@@ -322,62 +323,30 @@
                     if (AudioCtx) this.ctx = new AudioCtx();
                 }
                 if (this.ctx && this.ctx.state === 'suspended') {
-                    this.ctx.resume().catch(() => {});
+                    this.ctx.resume();
                 }
                 if (!this.bgAudio) {
                     this.bgAudio = document.getElementById('bg-music');
-                    if (this.bgAudio) {
-                        // Tự động dò tìm tên file nhạc đúng ngay khi tải trang (tránh lỗi trễ nhịp trên điện thoại)
-                        this.bgAudio.addEventListener('error', () => {
-                            this.currentSourceIdx++;
-                            if (this.currentSourceIdx < this.candidateSources.length) {
-                                this.bgAudio.src = this.candidateSources[this.currentSourceIdx];
-                                this.bgAudio.load();
-                                if (APP_STATE.soundEnabled && this.userHasInteracted) {
-                                    this.bgAudio.play().catch(() => {});
-                                }
-                            } else {
-                                // Nếu chưa tải file mp3 lên GitHub, tự động kích hoạt nhạc nền lãng mạn dự phòng
-                                this.mp3Failed = true;
-                                if (APP_STATE.soundEnabled && this.userHasInteracted) {
-                                    this.startFallbackRomanticMelody();
-                                }
-                            }
-                        });
-                    }
                 }
             }
-            startBackgroundMusic(fromUserGesture = false) {
-                if (fromUserGesture) this.userHasInteracted = true;
+            startBackgroundMusic() {
                 this.init();
-                if (!APP_STATE.soundEnabled) return;
-
-                if (this.mp3Failed) {
-                    this.startFallbackRomanticMelody();
-                    return;
-                }
-
-                if (!this.bgAudio) return;
+                if (!this.bgAudio || !APP_STATE.soundEnabled) return;
 
                 if (this.bgAudio.paused) {
-                    try {
-                        this.bgAudio.volume = 0.65;
-                    } catch (e) {}
-
+                    this.bgAudio.volume = 0.05;
                     const playPromise = this.bgAudio.play();
                     if (playPromise !== undefined) {
                         playPromise.then(() => {
                             this.isBgPlaying = true;
-                            this.stopFallbackRomanticMelody();
-                            this.fadeInVolume(0.8);
+                            this.fadeInVolume(0.75);
                         }).catch(() => {
-                            // Trình duyệt di động yêu cầu thao tác click/touchend trực tiếp
-                            this.isBgPlaying = false;
+                            // Trình duyệt chờ thao tác chạm đầu tiên của người dùng
                         });
                     }
                 }
             }
-            fadeInVolume(targetVol = 0.8) {
+            fadeInVolume(targetVol = 0.75) {
                 if (!this.bgAudio) return;
                 if (this.fadeInterval) clearInterval(this.fadeInterval);
                 this.fadeInterval = setInterval(() => {
@@ -385,73 +354,26 @@
                         clearInterval(this.fadeInterval);
                         return;
                     }
-                    try {
-                        if (this.bgAudio.volume < targetVol - 0.05) {
-                            this.bgAudio.volume = Math.min(targetVol, this.bgAudio.volume + 0.05);
-                        } else {
-                            this.bgAudio.volume = targetVol;
-                            clearInterval(this.fadeInterval);
-                        }
-                    } catch (e) {
-                        // iOS Safari giữ volume mặc định của hệ thống
+                    if (this.bgAudio.volume < targetVol - 0.04) {
+                        this.bgAudio.volume = Math.min(targetVol, this.bgAudio.volume + 0.04);
+                    } else {
+                        this.bgAudio.volume = targetVol;
                         clearInterval(this.fadeInterval);
                     }
-                }, 90);
-            }
-            // Nhạc nền Hộp Nhạc (Music Box) dự phòng tự động nếu file MP3 bị thiếu trên GitHub
-            startFallbackRomanticMelody() {
-                if (this.fallbackLoopTimer || !APP_STATE.soundEnabled) return;
-                this.init();
-                if (!this.ctx) return;
-
-                // Giai điệu hợp âm lãng mạn lấy cảm hứng từ Old Love
-                const notes = [
-                    523.25, 659.25, 783.99, 987.77, // Cmaj7
-                    493.88, 587.33, 739.99, 987.77, // Bm7
-                    440.00, 523.25, 659.25, 783.99, // Am7
-                    392.00, 493.88, 587.33, 783.99  // Gmaj7
-                ];
-                let step = 0;
-                const playNote = () => {
-                    if (!APP_STATE.soundEnabled || !this.mp3Failed || !this.ctx) return;
-                    if (this.ctx.state === 'suspended') this.ctx.resume().catch(() => {});
-                    const now = this.ctx.currentTime;
-                    const freq = notes[step % notes.length];
-                    const osc = this.ctx.createOscillator();
-                    const gain = this.ctx.createGain();
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(freq, now);
-                    gain.gain.setValueAtTime(0.0001, now);
-                    gain.gain.exponentialRampToValueAtTime(0.025, now + 0.04);
-                    gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.8);
-                    osc.connect(gain);
-                    gain.connect(this.ctx.destination);
-                    osc.start(now);
-                    osc.stop(now + 1.85);
-                    step++;
-                };
-                playNote();
-                this.fallbackLoopTimer = setInterval(playNote, 450);
-                this.isBgPlaying = true;
-            }
-            stopFallbackRomanticMelody() {
-                if (this.fallbackLoopTimer) {
-                    clearInterval(this.fallbackLoopTimer);
-                    this.fallbackLoopTimer = null;
-                }
+                }, 80);
             }
             setMuted(muted) {
                 this.init();
+                if (!this.bgAudio) return;
                 if (muted) {
-                    if (this.bgAudio) this.bgAudio.pause();
-                    this.stopFallbackRomanticMelody();
+                    this.bgAudio.pause();
                 } else {
-                    this.startBackgroundMusic(true);
+                    this.startBackgroundMusic();
                 }
             }
             playGiftChime(opening = true) {
                 if (!APP_STATE.soundEnabled) return;
-                this.startBackgroundMusic(true);
+                this.startBackgroundMusic();
                 try {
                     this.init();
                     if (!this.ctx) return;
@@ -1609,20 +1531,18 @@
                 chimeAudio.setMuted(!APP_STATE.soundEnabled);
             });
 
-            // Mở khóa âm thanh chuẩn cho iOS Safari, Android Chrome và trình duyệt trong Zalo/Messenger
-            const unlockAudioOnInteraction = () => {
-                if (APP_STATE.soundEnabled && !chimeAudio.isBgPlaying) {
-                    chimeAudio.startBackgroundMusic(true);
+            // Tự động bật nhạc nền ngay khi người nhận chạm/click lần đầu vào trang
+            const unlockAudioOnFirstInteraction = () => {
+                if (APP_STATE.soundEnabled) {
+                    chimeAudio.startBackgroundMusic();
                 }
-                if (chimeAudio.isBgPlaying) {
-                    window.removeEventListener('click', unlockAudioOnInteraction);
-                    window.removeEventListener('touchend', unlockAudioOnInteraction);
-                    window.removeEventListener('keydown', unlockAudioOnInteraction);
-                }
+                window.removeEventListener('pointerdown', unlockAudioOnFirstInteraction);
+                window.removeEventListener('touchstart', unlockAudioOnFirstInteraction);
+                window.removeEventListener('keydown', unlockAudioOnFirstInteraction);
             };
-            window.addEventListener('click', unlockAudioOnInteraction, { passive: true });
-            window.addEventListener('touchend', unlockAudioOnInteraction, { passive: true });
-            window.addEventListener('keydown', unlockAudioOnInteraction, { passive: true });
+            window.addEventListener('pointerdown', unlockAudioOnFirstInteraction, { once: true });
+            window.addEventListener('touchstart', unlockAudioOnFirstInteraction, { once: true });
+            window.addEventListener('keydown', unlockAudioOnFirstInteraction, { once: true });
         }
 
         const clock = new THREE.Clock();
